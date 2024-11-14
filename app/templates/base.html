@@ -38,10 +38,10 @@
                 <div class="flex items-center space-x-4">
                     <!-- 管理员菜单 -->
                     {% if current_user.is_authenticated and current_user.is_admin %}
-                    <a href="{{ url_for('courses.manage_categories') }}" 
-                       class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                        分类管理
-                    </a>
+                    <a href="{{ url_for('admin.manage_categories') }}" 
+                    class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                     分类管理
+                 </a>
                     <a href="{{ url_for('admin.users') }}" 
                        class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                         用户管理

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app.models import User, Course, Category, CourseRequest, UserCourse
 from app.database import db
@@ -109,4 +109,33 @@ def handle_course_request(request_id, action):
         flash('课程请求已拒绝')
     
     db.session.commit()
-    return redirect(url_for('admin.course_requests')) 
+    return redirect(url_for('admin.course_requests'))
+
+@admin.route('/categories', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def manage_categories():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        if name:
+            category = Category(name=name)
+            db.session.add(category)
+            db.session.commit()
+            flash('分类添加成功！')
+        return redirect(url_for('admin.manage_categories'))
+    
+    categories = Category.query.all()
+    return render_template('admin/categories.html', categories=categories)
+
+@admin.route('/category/<int:category_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def delete_category(category_id):
+    category = Category.query.get_or_404(category_id)
+    if Course.query.filter_by(category_id=category_id).first():
+        flash('该分类下还有课程，无法删除')
+    else:
+        db.session.delete(category)
+        db.session.commit()
+        flash('分类已删除')
+    return redirect(url_for('admin.manage_categories')) 

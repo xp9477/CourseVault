@@ -112,22 +112,6 @@ def delete_course(course_id):
     flash('课程已删除')
     return redirect(url_for('main.index'))
 
-@courses.route('/categories', methods=['GET', 'POST'])
-@login_required
-@admin_required
-def manage_categories():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        if name:
-            category = Category(name=name)
-            db.session.add(category)
-            db.session.commit()
-            flash('分类添加成功！')
-        return redirect(url_for('courses.manage_categories'))
-    
-    categories = Category.query.all()
-    return render_template('courses/categories.html', categories=categories)
-
 @courses.route('/category/<int:category_id>/delete', methods=['POST'])
 @login_required
 @admin_required
