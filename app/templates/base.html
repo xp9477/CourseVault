@@ -39,8 +39,11 @@
                     <!-- 管理员菜单 -->
                     {% if current_user.is_authenticated and current_user.is_admin %}
                     <a href="{{ url_for('admin.index') }}" 
-                       class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                       class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium relative">
                         管理后台
+                        {% if pending_requests > 0 %}
+                        <span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
+                        {% endif %}
                     </a>
                     {% endif %}
 

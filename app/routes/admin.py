@@ -22,6 +22,7 @@ def index():
     total_users = User.query.count()
     total_courses = Course.query.count()
     total_categories = Category.query.count()
+    pending_requests = CourseRequest.query.filter_by(status='pending').count()
     
     recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
     recent_courses = Course.query.order_by(Course.created_at.desc()).limit(5).all()
@@ -30,6 +31,7 @@ def index():
                          total_users=total_users,
                          total_courses=total_courses,
                          total_categories=total_categories,
+                         pending_requests=pending_requests,
                          recent_users=recent_users,
                          recent_courses=recent_courses)
 
