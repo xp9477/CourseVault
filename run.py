@@ -2,28 +2,9 @@ import os
 import click
 from app import create_app
 from app.database import db
-from app.models import Category, User
-from werkzeug.security import generate_password_hash
+from app.models import Category
 
 app = create_app()
-
-@app.cli.command('create-admin')
-@click.argument('username')
-@click.argument('password')
-def create_admin(username, password):
-    """创建管理员账户"""
-    try:
-        admin = User(
-            username=username,
-            password_hash=generate_password_hash(password),
-            is_admin=True
-        )
-        db.session.add(admin)
-        db.session.commit()
-        print(f"管理员账户 {username} 创建成功!")
-    except Exception as e:
-        print(f"创建失败: {str(e)}")
-        db.session.rollback()
 
 @app.cli.command('init-db')
 def init_db():

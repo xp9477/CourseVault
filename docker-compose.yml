@@ -9,3 +9,5 @@ services:
     environment:
       - FLASK_ENV=production
       - SECRET_KEY=LAgr4XhIf6p2M64phoVYPxOzSSJPM4Pz
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=password123

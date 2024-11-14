@@ -13,21 +13,15 @@ CourseVault 是一个简单的课程资源管理系统，帮助用户管理和�
 
 ## 快速开始
 
-1. 运行容器
-
 ``` bash
 docker run -d \
 --name coursevault \
 -p 5000:5000 \
 -v $(pwd)/data:/app/data \
+-e ADMIN_USERNAME=admin \
+-e ADMIN_PASSWORD=password123 \
 xp9477/coursevault:latest
 ```
 
-2. 创建管理员账户
-
-``` bash
-docker exec -it coursevault flask create-admin admin password123
-```
-
-3. 访问 http://localhost:5000 即可使用系统
+访问 http://localhost:5000 即可使用系统
 
