@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- 分类筛选 -->
+<div class="mb-6 flex flex-wrap gap-2">
+    <a href="{{ url_for('main.index') }}" 
+       class="px-4 py-2 rounded-full text-sm {% if not selected_category %}bg-blue-500 text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+        全部
+    </a>
+    {% for category in categories %}
+    <a href="{{ url_for('main.index', category_id=category.id) }}"
+       class="px-4 py-2 rounded-full text-sm {% if selected_category == category.id %}bg-blue-500 text-white{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+        {{ category.name }}
+    </a>
+    {% endfor %}
+</div>
+
+<!-- 课程列表 -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% if courses %}
+        {% for course in courses %}
+        <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+            <!-- 课程图片 -->
+            <div class="relative pb-[56.25%] rounded-t-lg overflow-hidden bg-gradient-to-r from-blue-100 to-blue-50">
+                {% if course.image_url %}
+                    <img src="{{ course.image_url }}" 
+                         alt="{{ course.title }}"
+                         class="absolute top-0 left-0 w-full h-full object-cover">
+                {% else %}
+                    <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+                        <svg class="w-16 h-16 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="p-6">
+                <!-- 标题栏 -->
+                <div class="flex justify-between items-start mb-3">
+                    <h2 class="text-lg font-semibold text-gray-900">{{ course.title }}</h2>
+                    <a href="{{ url_for('courses.edit_course', course_id=course.id) }}" 
+                       class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                        </svg>
+                    </a>
+                </div>
+                
+                <!-- 平台标签 -->
+                <div class="mb-3">
+                    <span class="inline-block text-sm text-white bg-blue-500 rounded-full px-3 py-1">
+                        {{ course.platform }}
+                    </span>
+                </div>
+                
+                <!-- 描述 -->
+                {% if course.description %}
+                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ course.description }}</p>
+                {% endif %}
+                
+                <!-- 学习信息 -->
+                <div class="flex flex-col space-y-3">
+                    <!-- 集数和备注 -->
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-gray-500">
+                            {% if course.total_episodes > 1 %}
+                                总集数: {{ course.total_episodes }}
+                            {% endif %}
+                        </span>
+                        <a href="{{ url_for('courses.edit_notes', course_id=course.id) }}"
+                           class="text-blue-500 hover:text-blue-700 flex items-center space-x-1">
+                            {% if course.notes %}
+                            <span class="truncate max-w-[200px]">{{ course.notes }}</span>
+                            {% else %}
+                            <span>添加备注</span>
+                            {% endif %}
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                            </svg>
+                        </a>
+                    </div>
+                    
+                    <!-- 学习按钮 -->
+                    <div class="flex space-x-2">
+                        <a href="{{ course.share_link }}" 
+                           target="_blank"
+                           class="flex-1 bg-blue-500 text-white text-center py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
+                            {% if course.notes %}
+                                继续学习
+                            {% else %}
+                                开始学习
+                            {% endif %}
+                        </a>
+                        {% if course.share_code %}
+                        <div class="relative group">
+                            <button type="button"
+                                    class="bg-gray-100 text-gray-600 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+                                    onclick="navigator.clipboard.writeText('{{ course.share_code }}')">
+                                提取码
+                            </button>
+                            <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                点击复制：{{ course.share_code }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-span-full text-center py-12">
+            <p class="text-gray-500 mb-4">还没有任何课程</p>
+            <a href="{{ url_for('courses.add_course') }}" 
+               class="inline-flex items-center text-blue-500 hover:text-blue-700">
+                添加第一个课程
+                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- 添加课程按钮 -->
+<a href="{{ url_for('courses.add_course') }}" 
+   class="fixed bottom-8 right-8 bg-blue-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600 transition-colors">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+    </svg>
+</a>
+{% endblock %} 

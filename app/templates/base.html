@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CourseVault{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+        }
+        .modal.show {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{{ url_for('main.index') }}" class="text-xl font-bold text-gray-900">
+                        CourseVault
+                    </a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    {% if current_user.is_authenticated and current_user.is_admin %}
+                    <a href="{{ url_for('courses.manage_categories') }}" 
+                       class="text-gray-600 hover:text-gray-900">
+                        分类管理
+                    </a>
+                    <a href="{{ url_for('admin.index') }}" 
+                       class="text-gray-600 hover:text-gray-900">
+                        管理后台
+                    </a>
+                    {% endif %}
+                    
+                    {% if current_user.is_authenticated %}
+                    <div class="relative group">
+                        <button type="button" class="text-gray-600 hover:text-gray-900">
+                            {{ current_user.username }}
+                        </button>
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 hidden group-hover:block z-50">
+                            <a href="{{ url_for('profile.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                个人中心
+                            </a>
+                            <form action="{{ url_for('auth.logout') }}" method="POST" class="block">
+                                <button type="submit" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    退出登录
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="text-gray-600 hover:text-gray-900">
+                        登录
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" class="text-gray-600 hover:text-gray-900">
+                        注册
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-6">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="fixed top-4 right-4 z-50 animate-fade-in-out">
+                        <div class="px-4 py-2 rounded-lg shadow-lg {% if category == 'error' %}bg-red-500{% else %}bg-green-500{% endif %} text-white">
+                            {{ message }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <div id="noteModal" class="modal items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">更新学习备注</h3>
+                <form id="noteForm" method="POST">
+                    <textarea id="noteContent" name="notes" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="例如：已学习到第3集"></textarea>
+                    <div class="mt-4 flex justify-end space-x-3">
+                        <button type="button" onclick="closeNoteModal()"
+                                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                            取消
+                        </button>
+                        <button type="submit"
+                                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                            保存
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function openNoteModal(courseId, currentNote) {
+        const modal = document.getElementById('noteModal');
+        const form = document.getElementById('noteForm');
+        const textarea = document.getElementById('noteContent');
+        
+        // 设置当前备注内容
+        textarea.value = currentNote || '';
+        
+        // 设置表单提交地址
+        form.action = `/course/${courseId}/update_note`;
+        
+        // 显示对话框
+        modal.classList.add('show');
+        textarea.focus();
+    }
+
+    function closeNoteModal() {
+        const modal = document.getElementById('noteModal');
+        modal.classList.remove('show');
+    }
+
+    // 点击对话框外部关闭
+    document.getElementById('noteModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeNoteModal();
+        }
+    });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white rounded-lg shadow-sm p-6">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">添加课程</h2>
+    
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="title">
+                课程名称 *
+            </label>
+            <input type="text" id="title" name="title" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="image">
+                课程图片
+            </label>
+            <input type="file" id="image" name="image" accept="image/*"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <p class="mt-1 text-sm text-gray-500">如果不上传图片将使用默认图片</p>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="description">
+                课程描述
+            </label>
+            <textarea id="description" name="description" rows="3"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="category_id">
+                课程分类 *
+            </label>
+            <select id="category_id" name="category_id" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="share_link">
+                分享链接 *
+            </label>
+            <input type="url" id="share_link" name="share_link" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="share_code">
+                提取码
+            </label>
+            <input type="text" id="share_code" name="share_code"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        
+        <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="total_episodes">
+                总集数
+            </label>
+            <input type="number" id="total_episodes" name="total_episodes" min="1"
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <p class="mt-1 text-sm text-gray-500">如果不填写默认为1</p>
+        </div>
+        
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-medium mb-2" for="notes">
+                学习备注
+            </label>
+            <textarea id="notes" name="notes" rows="3"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="例如：已学习到第3集"></textarea>
+        </div>
+        
+        <div class="flex justify-end space-x-4">
+            <a href="{{ url_for('main.index') }}" 
+               class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                取消
+            </a>
+            <button type="submit" 
+                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                添加课程
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %} 
