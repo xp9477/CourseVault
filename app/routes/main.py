@@ -1,10 +1,11 @@
 from flask import render_template, Blueprint, request
 from app.models import Course, Category, CourseRequest
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 main = Blueprint('main', __name__)
 
 @main.route('/')
+@login_required
 def index():
     category_id = request.args.get('category_id', type=int)
     categories = Category.query.all()
