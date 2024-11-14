@@ -8,13 +8,19 @@
             <div class="bg-white rounded-lg shadow p-6">
                 <h2 class="text-xl font-bold mb-4">个人信息</h2>
                 <div class="space-y-4">
-                    <div>
-                        <label class="text-gray-600">用户名</label>
+                    <div class="flex justify-between items-center">
                         <p class="font-medium">{{ current_user.username }}</p>
+                        <button onclick="togglePasswordForm()" 
+                                class="text-blue-500 hover:text-blue-700">
+                            修改密码
+                        </button>
                     </div>
                     
-                    <!-- 修改密码表单 -->
-                    <form method="POST" action="{{ url_for('profile.change_password') }}" class="space-y-4">
+                    <!-- 修改密码表单 - 默认隐藏 -->
+                    <form id="passwordForm" 
+                          method="POST" 
+                          action="{{ url_for('profile.change_password') }}" 
+                          class="space-y-4 hidden">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">当前密码</label>
                             <input type="password" name="old_password" required
@@ -30,10 +36,17 @@
                             <input type="password" name="confirm_password" required
                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                         </div>
-                        <button type="submit" 
-                                class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                            修改密码
-                        </button>
+                        <div class="flex justify-end space-x-2">
+                            <button type="button" 
+                                    onclick="togglePasswordForm()"
+                                    class="px-3 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
+                                取消
+                            </button>
+                            <button type="submit" 
+                                    class="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                                确认修改
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -41,27 +54,6 @@
         
         <!-- 右侧课程信息 -->
         <div class="md:col-span-2 space-y-6">
-            <!-- 进行中的课程 -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-xl font-bold mb-4">进行中的课程</h2>
-                <div class="grid grid-cols-1 gap-4">
-                    {% for course in in_progress_courses %}
-                    <div class="border rounded p-4">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-medium">{{ course.title }}</h3>
-                                <p class="text-sm text-gray-500">进度: {{ course.progress }}%</p>
-                            </div>
-                            <a href="{{ url_for('courses.edit_course', course_id=course.id) }}"
-                               class="text-blue-500 hover:text-blue-700">
-                                继续学习
-                            </a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            
             <!-- 已完成的课程 -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h2 class="text-xl font-bold mb-4">已完成的课程</h2>
@@ -75,7 +67,7 @@
                             </div>
                             <a href="{{ url_for('courses.edit_course', course_id=course.id) }}"
                                class="text-blue-500 hover:text-blue-700">
-                                继续学习
+                                查看详情
                             </a>
                         </div>
                     </div>
@@ -85,4 +77,11 @@
         </div>
     </div>
 </div>
+
+<script>
+function togglePasswordForm() {
+    const form = document.getElementById('passwordForm');
+    form.classList.toggle('hidden');
+}
+</script>
 {% endblock %} 

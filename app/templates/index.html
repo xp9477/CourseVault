@@ -1,6 +1,32 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<div class="mb-8"></div>
+    <!-- 进行中的课程 -->
+    {% if in_progress_courses %}
+    <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <h2 class="text-xl font-bold mb-4">进行中的课程</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for course in in_progress_courses %}
+            <div class="border rounded p-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-medium">{{ course.title }}</h3>
+                        <p class="text-sm text-gray-500">进度: {{ course.progress }}%</p>
+                    </div>
+                    <a href="{{ url_for('courses.edit_course', course_id=course.id) }}"
+                       class="text-blue-500 hover:text-blue-700">
+                        继续学习
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
 <!-- 分类筛选 -->
 <div class="mb-6 flex flex-wrap gap-2">
     <a href="{{ url_for('main.index') }}" 

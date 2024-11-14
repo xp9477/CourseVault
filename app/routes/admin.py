@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import login_required, current_user
 from app.models import User, Course, Category, CourseRequest, UserCourse
 from app.database import db
@@ -141,3 +141,17 @@ def delete_category(category_id):
         db.session.commit()
         flash('分类已删除')
     return redirect(url_for('admin.manage_categories'))
+
+@admin.route('/course-request/<int:request_id>/details')
+@login_required
+@admin_required
+def course_request_details(request_id):
+    course_request = CourseRequest.query.get_or_404(request_id)
+    return jsonify({
+        'title': course_request.title,
+        'description': course_request.description,
+        'share_link': course_request.share_link,
+        'share_code': course_request.share_code,
+        'total_episodes': course_request.total_episodes,
+        'notes': course_request.notes
+    })

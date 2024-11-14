@@ -35,6 +35,11 @@
                         <div class="text-sm text-gray-500">{{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button type="button" 
+                                onclick="showDetails('{{ request.id }}')"
+                                class="text-blue-600 hover:text-blue-900 mr-4">
+                            查看详情
+                        </button>
                         <form method="POST" action="{{ url_for('admin.handle_course_request', request_id=request.id, action='approve') }}" class="inline">
                             <button type="submit" class="text-green-600 hover:text-green-900 mr-4">批准</button>
                         </form>
@@ -48,4 +53,63 @@
         </table>
     </div>
 </div>
+
+<!-- 详情模态框 -->
+<div id="detailsModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+    <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+        <div class="flex justify-between items-start mb-4">
+            <h3 class="text-lg font-semibold">课程请求详情</h3>
+            <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div id="requestDetails" class="space-y-4">
+            <!-- 这里将通过 JavaScript 填充内容 -->
+        </div>
+    </div>
+</div>
+
+<script>
+function showDetails(requestId) {
+    fetch(`/admin/course-request/${requestId}/details`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('requestDetails').innerHTML = `
+                <div class="grid grid-cols-1 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">课程名称</label>
+                        <div class="mt-1">${data.title}</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">课程描述</label>
+                        <div class="mt-1">${data.description || '无'}</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">分享链接</label>
+                        <div class="mt-1">${data.share_link}</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">提取码</label>
+                        <div class="mt-1">${data.share_code || '无'}</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">总集数</label>
+                        <div class="mt-1">${data.total_episodes}</div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">学习备注</label>
+                        <div class="mt-1">${data.notes || '无'}</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('detailsModal').classList.remove('hidden');
+        });
+}
+
+function closeModal() {
+    document.getElementById('detailsModal').classList.add('hidden');
+}
+</script>
 {% endblock %} 

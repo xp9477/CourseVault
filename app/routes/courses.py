@@ -46,7 +46,6 @@ def add_course():
             share_code=request.form.get('share_code'),
             total_episodes=int(request.form.get('total_episodes', 1)),
             image_url=image_url,
-            notes=request.form.get('notes'),
             user_id=current_user.id
         )
         
