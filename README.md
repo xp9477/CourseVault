@@ -30,3 +30,4 @@ docker exec -it coursevault flask create-admin admin password123
 ```
 
 3. 访问 http://localhost:5000 即可使用系统
+
