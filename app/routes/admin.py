@@ -138,4 +138,4 @@ def delete_category(category_id):
         db.session.delete(category)
         db.session.commit()
         flash('分类已删除')
-    return redirect(url_for('admin.manage_categories')) 
+    return redirect(url_for('admin.manage_categories'))

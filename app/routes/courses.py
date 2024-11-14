@@ -112,19 +112,6 @@ def delete_course(course_id):
     flash('课程已删除')
     return redirect(url_for('main.index'))
 
-@courses.route('/category/<int:category_id>/delete', methods=['POST'])
-@login_required
-@admin_required
-def delete_category(category_id):
-    category = Category.query.get_or_404(category_id)
-    if Course.query.filter_by(category_id=category_id).first():
-        flash('该分类下还有课程，无法删除')
-    else:
-        db.session.delete(category)
-        db.session.commit()
-        flash('分类已删除')
-    return redirect(url_for('courses.manage_categories'))
-
 @courses.route('/course/<int:course_id>/update_note', methods=['POST'])
 @login_required
 def update_note(course_id):
