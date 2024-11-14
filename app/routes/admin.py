@@ -15,7 +15,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@admin.route('/admin')
+@admin.route('/')
 @login_required
 @admin_required
 def index():
@@ -33,14 +33,14 @@ def index():
                          recent_users=recent_users,
                          recent_courses=recent_courses)
 
-@admin.route('/admin/users')
+@admin.route('/users')
 @login_required
 @admin_required
 def users():
     users = User.query.order_by(User.created_at.desc()).all()
     return render_template('admin/users.html', users=users)
 
-@admin.route('/admin/user/<int:user_id>/toggle-admin', methods=['POST'])
+@admin.route('/user/<int:user_id>/toggle-admin', methods=['POST'])
 @login_required
 @admin_required
 def toggle_admin(user_id):
@@ -53,7 +53,7 @@ def toggle_admin(user_id):
         flash(f'已{"授予" if user.is_admin else "撤销"}{user.username}的管理员权限')
     return redirect(url_for('admin.users'))
 
-@admin.route('/admin/user/<int:user_id>/delete', methods=['POST'])
+@admin.route('/user/<int:user_id>/delete', methods=['POST'])
 @login_required
 @admin_required
 def delete_user(user_id):
@@ -76,14 +76,14 @@ def delete_user(user_id):
     flash(f'用户 {user.username} 已删除')
     return redirect(url_for('admin.users'))
 
-@admin.route('/admin/course-requests')
+@admin.route('/course-requests')
 @login_required
 @admin_required
 def course_requests():
     requests = CourseRequest.query.filter_by(status='pending').order_by(CourseRequest.created_at.desc()).all()
     return render_template('admin/course_requests.html', requests=requests)
 
-@admin.route('/admin/course-request/<int:request_id>/<action>', methods=['POST'])
+@admin.route('/course-request/<int:request_id>/<action>', methods=['POST'])
 @login_required
 @admin_required
 def handle_course_request(request_id, action):
