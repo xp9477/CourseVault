@@ -44,7 +44,7 @@ def add_course():
             category_id=request.form['category_id'],
             share_link=request.form['share_link'],
             share_code=request.form.get('share_code'),
-            total_episodes=int(request.form.get('total_episodes', 1)),
+            total_episodes=int(request.form.get('total_episodes')) if request.form.get('total_episodes') else 1,
             image_url=image_url,
             user_id=current_user.id
         )

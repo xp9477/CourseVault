@@ -153,5 +153,63 @@ def course_request_details(request_id):
         'share_link': course_request.share_link,
         'share_code': course_request.share_code,
         'total_episodes': course_request.total_episodes,
-        'notes': course_request.notes
     })
+
+@admin.route('/course/<int:course_id>/update_note', methods=['POST'])
+@login_required
+def update_note(course_id):
+    # 获取或创建用户课程关系
+    user_course = UserCourse.query.filter_by(
+        user_id=current_user.id,
+        course_id=course_id
+    ).first()
+    
+    if not user_course:
+        user_course = UserCourse(
+            user_id=current_user.id,
+            course_id=course_id
+        )
+        db.session.add(user_course)
+    
+    user_course.notes = request.form.get('notes')
+    
+    try:
+        db.session.commit()
+        flash('备注已更新', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('更新失败，请重试', 'error')
+        print(f"Error: {e}")
+    
+    return redirect(url_for('main.index'))
+
+@admin.route('/course/<int:course_id>/notes', methods=['GET', 'POST'])
+@login_required
+def edit_notes(course_id):
+    course = Course.query.get_or_404(course_id)
+    user_course = UserCourse.query.filter_by(
+        user_id=current_user.id,
+        course_id=course_id
+    ).first()
+    
+    if request.method == 'POST':
+        if not user_course:
+            user_course = UserCourse(
+                user_id=current_user.id,
+                course_id=course_id
+            )
+            db.session.add(user_course)
+        
+        user_course.notes = request.form.get('notes')
+        try:
+            db.session.commit()
+            flash('备注更新成功！')
+            return redirect(url_for('main.index'))
+        except Exception as e:
+            db.session.rollback()
+            flash('更新失败，请重试')
+            print(f"Error: {e}")
+    
+    return render_template('courses/edit_notes.html', 
+                         course=course,
+                         notes=user_course.notes if user_course else '')
