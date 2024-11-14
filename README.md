@@ -20,7 +20,7 @@ docker run -d \
 --name coursevault \
 -p 5000:5000 \
 -v $(pwd)/data:/app/data \
-coursevault
+xp9477/coursevault:latest
 ```
 
 2. 创建管理员账户
