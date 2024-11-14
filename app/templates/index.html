@@ -97,8 +97,9 @@
                         </span>
                         <a href="{{ url_for('courses.edit_notes', course_id=course.id) }}"
                            class="text-blue-500 hover:text-blue-700 flex items-center space-x-1">
-                            {% if course.notes %}
-                            <span class="truncate max-w-[200px]">{{ course.notes }}</span>
+                            {% set user_course = course.user_courses|selectattr('user_id', 'equalto', current_user.id)|first %}
+                            {% if user_course and user_course.notes %}
+                            <span class="truncate max-w-[200px]">{{ user_course.notes }}</span>
                             {% else %}
                             <span>添加备注</span>
                             {% endif %}

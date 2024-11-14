@@ -31,6 +31,7 @@ class Course(db.Model):
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    user_courses = db.relationship('UserCourse', backref='course', lazy='dynamic')
     
     @property
     def platform(self):
