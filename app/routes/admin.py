@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
-from app.models import User, Course, Category, CourseRequest
+from app.models import User, Course, Category, CourseRequest, UserCourse
 from app.database import db
 from functools import wraps
 
@@ -58,12 +58,22 @@ def toggle_admin(user_id):
 @admin_required
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
-    if user == current_user:
-        flash('不能删除自己的账户')
-    else:
-        db.session.delete(user)
-        db.session.commit()
-        flash(f'已删除用户 {user.username}')
+    
+    # 不能删除自己
+    if user.id == current_user.id:
+        flash('不能删除自己的账号')
+        return redirect(url_for('admin.users'))
+        
+    # 删除用户相关数据
+    UserCourse.query.filter_by(user_id=user.id).delete()
+    CourseRequest.query.filter_by(user_id=user.id).delete()
+    # 删除用户创建的课程请求
+    CourseRequest.query.filter_by(user_id=user.id).delete()
+    
+    db.session.delete(user)
+    db.session.commit()
+    
+    flash(f'用户 {user.username} 已删除')
     return redirect(url_for('admin.users'))
 
 @admin.route('/admin/course-requests')
