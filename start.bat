@@ -14,7 +14,7 @@ pip install -r requirements.txt
 REM 设置环境变量
 set FLASK_ENV=development
 set ADMIN_USERNAME=admin
-set ADMIN_PASSWORD=admin123
+set ADMIN_PASSWORD=admin
 
 REM 运行应用
 python run.py 

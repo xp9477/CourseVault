@@ -1,20 +1,30 @@
 import os
 
 class Config:
-    # 基础配置
-    BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+    # 基础数据目录
+    DATA_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data')
     
-    # 创建数据目录
-    DATA_DIR = os.path.join(BASE_DIR, 'data')
-    if not os.path.exists(DATA_DIR):
-        os.makedirs(DATA_DIR)
+    # 数据库文件路径
+    SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(DATA_PATH, 'database.db')}"
     
+    # 上传文件存储路径
+    UPLOAD_FOLDER = os.path.join(DATA_PATH, 'uploads')
+    
+    # 确保必要的目录存在
+    @staticmethod
+    def init_app(app):
+        os.makedirs(app.config['DATA_PATH'], exist_ok=True)
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        
+        # 创建静态文件软链接
+        static_images_path = os.path.join(app.static_folder, 'data', 'images')
+        if not os.path.exists(static_images_path):
+            os.makedirs(os.path.dirname(static_images_path), exist_ok=True)
+            os.symlink(app.config['DATA_PATH'], static_images_path)
+
     # 数据库配置
-    SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.join(DATA_DIR, "app.db")}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # 上传文件配置
-    UPLOAD_FOLDER = 'app/static/uploads'
 
 
 class DevelopmentConfig(Config):

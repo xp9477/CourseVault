@@ -1,8 +1,10 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, current_app
 from flask_login import login_required, current_user
 from app.models import User, Course, Category, CourseRequest, UserCourse
 from app.database import db
 from functools import wraps
+from app.routes.courses import move_temp_to_permanent
+import os
 
 admin = Blueprint('admin', __name__)
 
@@ -92,7 +94,12 @@ def handle_course_request(request_id, action):
     course_request = CourseRequest.query.get_or_404(request_id)
     
     if action == 'approve':
-        # 创建新课程
+        # 移动临时图片到永久存储
+        image_url = None
+        if course_request.temp_image:
+            image_url = move_temp_to_permanent(course_request.temp_image)
+        
+        # 创建课程
         course = Course(
             title=course_request.title,
             description=course_request.description,
@@ -100,17 +107,30 @@ def handle_course_request(request_id, action):
             share_link=course_request.share_link,
             share_code=course_request.share_code,
             total_episodes=course_request.total_episodes,
-            image_url=course_request.image_url,
-            notes=course_request.notes
+            image_url=image_url
         )
-        db.session.add(course)
-        course_request.status = 'approved'
-        flash('课程请求已批准')
+        
+        try:
+            db.session.add(course)
+            db.session.delete(course_request)
+            db.session.commit()
+            flash('课程请求已批准')
+        except Exception as e:
+            db.session.rollback()
+            flash('操作失败，请重试')
+            print(f"Error: {e}")
+    
     elif action == 'reject':
-        course_request.status = 'rejected'
+        # 删除临时图片
+        if course_request.temp_image:
+            temp_path = os.path.join(current_app.config['DATA_PATH'], 'temp', course_request.temp_image)
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+        
+        db.session.delete(course_request)
+        db.session.commit()
         flash('课程请求已拒绝')
     
-    db.session.commit()
     return redirect(url_for('admin.course_requests'))
 
 @admin.route('/categories', methods=['GET', 'POST'])

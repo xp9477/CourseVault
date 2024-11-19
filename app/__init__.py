@@ -2,13 +2,7 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from app.database import db
-from app.models import User
 from app.config import config
-from app.routes.main import main
-from app.routes.auth import auth
-from app.routes.admin import admin
-from app.routes.courses import courses
-from app.routes.profile import profile
 import os
 
 def create_app(config_name='default'):
@@ -16,6 +10,9 @@ def create_app(config_name='default'):
     
     # 加载配置
     app.config.from_object(config[config_name])
+    
+    # 确保数据目录存在
+    os.makedirs(app.config['DATA_PATH'], exist_ok=True)
     
     # 设置 secret key
     app.secret_key = app.config['SECRET_KEY']

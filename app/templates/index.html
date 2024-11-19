@@ -42,7 +42,7 @@
 </div>
 
 <!-- 课程列表 -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
     {% if courses %}
         {% for course in courses %}
         <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col h-[280px]">
@@ -65,7 +65,7 @@
             <div class="p-4 flex-1 flex flex-col">
                 <!-- 标题栏 -->
                 <div class="flex justify-between items-start mb-3">
-                    <h2 class="text-base font-semibold text-gray-900 line-clamp-2">{{ course.title }}</h2>
+                    <h2 class="text-base font-semibold text-gray-900 line-clamp-2 min-h-[3rem]">{{ course.title }}</h2>
                     <a href="{{ url_for('courses.edit_course', course_id=course.id) }}" 
                        class="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,7 +82,7 @@
                 </div> -->
                 
                 <!-- 描述 -->
-                <p class="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[1rem]">
+                <p class="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[1rem] hidden md:block">
                     {{ course.description }}
                 </p>
                 
