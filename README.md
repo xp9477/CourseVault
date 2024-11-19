@@ -17,7 +17,7 @@ CourseVault 是一个简单的课程资源管理系统，帮助用户管理和�
 docker run -d \
 --name coursevault \
 -p 5000:5000 \
--v $(pwd)/data:/app/data \
+-v $(pwd)/data:/coursevault/app/data \
 -e ADMIN_USERNAME=admin \
 -e ADMIN_PASSWORD=password123 \
 xp9477/coursevault:latest

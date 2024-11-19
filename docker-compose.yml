@@ -5,7 +5,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - .:/app
+      - ./data:/coursevault/app/data
     environment:
       - FLASK_ENV=production
       - SECRET_KEY=LAgr4XhIf6p2M64phoVYPxOzSSJPM4Pz
