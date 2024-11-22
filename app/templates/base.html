@@ -16,9 +16,11 @@
             bottom: 0;
             background: rgba(0, 0, 0, 0.5);
             z-index: 50;
+            align-items: center;
+            justify-content: center;
         }
         .modal.show {
-            display: flex;
+            display: flex !important;
         }
         [x-cloak] { 
             display: none !important; 
@@ -121,6 +123,59 @@
         </div>
     </div>
 
+    <div id="courseModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 id="modalTitle" class="text-xl font-semibold"></h3>
+                    <div class="flex space-x-2">
+                        <a href="#" id="modalEditButton" 
+                           class="text-blue-500 hover:text-blue-700">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </a>
+                        <button onclick="closeCourseModal()" class="text-gray-500 hover:text-gray-700">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <img id="modalImage" class="w-full h-48 object-cover rounded-lg" src="" alt="">
+                    <div class="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-500">状态:</span>
+                            <span id="modalStatus"></span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">分类:</span>
+                            <span id="modalCategory"></span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">集数:</span>
+                            <span id="modalEpisodes"></span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-gray-500">描述:</span>
+                        <p id="modalDescription" class="mt-1 text-gray-700"></p>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <a id="modalStartButton" href="#" target="_blank"
+                       class="block w-full text-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                        开始学习
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
     function openNoteModal(courseId, currentNote) {
         const modal = document.getElementById('noteModal');
@@ -150,18 +205,71 @@
         }
     });
 
-    const menuButton = document.getElementById('user-menu-button');
-    const menu = document.getElementById('user-menu');
+    function showCourseModal(course) {
+        const modal = document.getElementById('courseModal');
+        const title = document.getElementById('modalTitle');
+        const image = document.getElementById('modalImage');
+        const status = document.getElementById('modalStatus');
+        const category = document.getElementById('modalCategory');
+        const episodes = document.getElementById('modalEpisodes');
+        const description = document.getElementById('modalDescription');
+        const startButton = document.getElementById('modalStartButton');
+        const editButton = document.getElementById('modalEditButton');
+        
+        title.textContent = course.title;
+        image.src = course.image_url || '/static/default-course.png';
+        
+        // 设置状态样式和文本
+        if (course.progress === 0) {
+            status.innerHTML = '<span class="text-red-500">未开始</span>';
+        } else if (course.progress < 100) {
+            status.innerHTML = '<span class="text-yellow-500">进行中 (' + course.progress + '%)</span>';
+        } else {
+            status.innerHTML = '<span class="text-green-500">已完成</span>';
+        }
+        
+        category.textContent = course.category || '未分类';
+        episodes.textContent = course.total_episodes + '集';
+        description.textContent = course.description || '暂无描述';
+        startButton.href = course.share_link;
+        editButton.href = `/courses/${course.id}/edit`;
+        
+        modal.classList.add('show');
+    }
 
-    menuButton.addEventListener('click', () => {
-        menu.classList.toggle('hidden');
+    function closeCourseModal() {
+        const modal = document.getElementById('courseModal');
+        modal.classList.remove('show');
+    }
+
+    // 点击模态框外部关闭
+    document.getElementById('courseModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCourseModal();
+        }
     });
 
-    // 点击其他地方关闭菜单
-    document.addEventListener('click', (event) => {
-        if (!menuButton.contains(event.target) && !menu.contains(event.target)) {
-            menu.classList.add('hidden');
+    // 等待 DOM 加载完成
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuButton = document.getElementById('menuButton');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        if (menuButton && mobileMenu) {  // 添加判断
+            menuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
         }
+        
+        // 模态框关闭按钮
+        const closeModalButtons = document.querySelectorAll('[data-dismiss="modal"]');
+        closeModalButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const modal = this.closest('.modal');
+                if (modal) {
+                    modal.classList.remove('show');
+                }
+            });
+        });
     });
     </script>
 </body>

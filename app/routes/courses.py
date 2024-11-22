@@ -66,7 +66,7 @@ def add_course():
     categories = Category.query.all()
     return render_template('courses/add.html', categories=categories)
 
-@courses.route('/course/<int:course_id>/edit', methods=['GET', 'POST'])
+@courses.route('/<int:course_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_course(course_id):
     course = Course.query.get_or_404(course_id)
