@@ -1,5 +1,3 @@
-import os
-import click
 from app import create_app
 from app.database import db
 from app.models import Category
@@ -37,4 +35,4 @@ def init_db():
                 print(f"Error: {e}")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5555, debug=True)

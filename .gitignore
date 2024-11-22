@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 venv/
 .env
+local_run.py
 
 # 数据目录
 app/data/*
