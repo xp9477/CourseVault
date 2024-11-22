@@ -5,7 +5,6 @@ from app.database import db
 import os
 from werkzeug.utils import secure_filename
 from functools import wraps
-import shutil
 from datetime import datetime
 
 # 创建蓝图
@@ -25,46 +24,22 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def save_temp_image(file):
-    """保存图片到临时目录"""
-    if file and allowed_file(file.filename):
-        # 生成临时文件名
-        ext = file.filename.rsplit('.', 1)[1].lower()
-        temp_filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{secure_filename(file.filename)}"
-        
-        # 确保临时目录存在
-        temp_dir = os.path.join(current_app.config['DATA_PATH'], 'temp')
-        os.makedirs(temp_dir, exist_ok=True)
-        
-        # 保存临时文件
-        temp_path = os.path.join(temp_dir, temp_filename)
-        file.save(temp_path)
-        return temp_filename
-    return None
-
-def move_temp_to_permanent(temp_filename):
-    """将临时文件移动到永久存储目录"""
-    if temp_filename:
-        temp_path = os.path.join(current_app.config['DATA_PATH'], 'temp', temp_filename)
-        if os.path.exists(temp_path):
-            # 确保永久存储目录存在
-            perm_dir = os.path.join(current_app.config['DATA_PATH'], 'uploads')
-            os.makedirs(perm_dir, exist_ok=True)
-            
-            # 移动文件
-            perm_path = os.path.join(perm_dir, temp_filename)
-            shutil.move(temp_path, perm_path)
-            return f'data/uploads/{temp_filename}'
-    return None
 
 @courses.route('/course/add', methods=['GET', 'POST'])
 @login_required
 def add_course():
     if request.method == 'POST':
-        # 处理图片上传到临时目录
-        temp_filename = None
+        # 处理图片上传
+        image_url = None
         if 'image' in request.files:
-            temp_filename = save_temp_image(request.files['image'])
+            file = request.files['image']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                # 确保目录存在
+                os.makedirs(os.path.join(current_app.config['DATA_PATH'], 'uploads'), exist_ok=True)
+                filepath = os.path.join(current_app.config['DATA_PATH'], 'uploads', filename)
+                file.save(filepath)
+                image_url = f'data/uploads/{filename}'
         
         # 创建课程请求
         course_request = CourseRequest(
@@ -74,7 +49,7 @@ def add_course():
             share_link=request.form['share_link'],
             share_code=request.form.get('share_code'),
             total_episodes=int(request.form.get('total_episodes')) if request.form.get('total_episodes') else 1,
-            temp_image=temp_filename,  # 保存临时文件名
+            image_url=image_url,
             user_id=current_user.id
         )
         
@@ -84,11 +59,6 @@ def add_course():
             flash('课程添加请求已提交,等待管理员审核')
             return redirect(url_for('main.index'))
         except Exception as e:
-            # 如果保存失败,删除临时文件
-            if temp_filename:
-                temp_path = os.path.join(current_app.config['DATA_PATH'], 'temp', temp_filename)
-                if os.path.exists(temp_path):
-                    os.remove(temp_path)
             db.session.rollback()
             flash('添加失败，请重试')
             print(f"Error: {e}")
