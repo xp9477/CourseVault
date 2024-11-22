@@ -99,7 +99,6 @@ def handle_course_request(request_id, action):
             description=course_request.description,
             category_id=course_request.category_id,
             share_link=course_request.share_link,
-            share_code=course_request.share_code,
             total_episodes=course_request.total_episodes,
             image_url=course_request.image_url
         )
@@ -166,7 +165,6 @@ def course_request_details(request_id):
         'title': course_request.title,
         'description': course_request.description,
         'share_link': course_request.share_link,
-        'share_code': course_request.share_code,
         'total_episodes': course_request.total_episodes,
     })
 

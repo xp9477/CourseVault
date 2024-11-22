@@ -35,32 +35,53 @@ def add_course():
             file = request.files['image']
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                # 确保目录存在
                 os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
                 filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                 file.save(filepath)
                 image_url = url_for('main.uploaded_file', filename=filename)
         
-        # 创建课程请求
-        course_request = CourseRequest(
-            title=request.form['title'],
-            description=request.form.get('description'),
-            category_id=request.form['category_id'],
-            share_link=request.form['share_link'],
-            total_episodes=int(request.form.get('total_episodes')) if request.form.get('total_episodes') else 1,
-            image_url=image_url,
-            user_id=current_user.id
-        )
+        # 如果是管理员,直接创建课程
+        if current_user.is_admin:
+            course = Course(
+                title=request.form['title'],
+                description=request.form.get('description'),
+                category_id=request.form['category_id'],
+                share_link=request.form['share_link'],
+                total_episodes=int(request.form.get('total_episodes')) if request.form.get('total_episodes') else 1,
+                image_url=image_url
+            )
+            
+            try:
+                db.session.add(course)
+                db.session.commit()
+                flash('课程添加成功')
+                return redirect(url_for('main.index'))
+            except Exception as e:
+                db.session.rollback()
+                flash('添加失败，请重试')
+                print(f"Error: {e}")
         
-        try:
-            db.session.add(course_request)
-            db.session.commit()
-            flash('课程添加请求已提交,等待管理员审核')
-            return redirect(url_for('main.index'))
-        except Exception as e:
-            db.session.rollback()
-            flash('添加失败，请重试')
-            print(f"Error: {e}")
+        # 非管理员创建课程请求
+        else:
+            course_request = CourseRequest(
+                title=request.form['title'],
+                description=request.form.get('description'),
+                category_id=request.form['category_id'],
+                share_link=request.form['share_link'],
+                total_episodes=int(request.form.get('total_episodes')) if request.form.get('total_episodes') else 1,
+                image_url=image_url,
+                user_id=current_user.id
+            )
+            
+            try:
+                db.session.add(course_request)
+                db.session.commit()
+                flash('课程添加请求已提交,等待管理员审核')
+                return redirect(url_for('main.index'))
+            except Exception as e:
+                db.session.rollback()
+                flash('添加失败，请重试')
+                print(f"Error: {e}")
     
     categories = Category.query.all()
     return render_template('courses/add.html', categories=categories)
@@ -95,6 +116,18 @@ def edit_course(course_id):
                 file.save(filepath)
                 course.image_url = url_for('main.uploaded_file', filename=filename)
         
+        # 处理已学习集数并计算进度
+        try:
+            completed = int(request.form.get('completed_episodes', 0))
+            if 0 <= completed <= course.total_episodes:
+                course.progress = round((completed / course.total_episodes) * 100)
+            else:
+                flash('已学习集数不能超过总集数')
+                return redirect(url_for('courses.edit_course', course_id=course_id))
+        except (ValueError, ZeroDivisionError):
+            flash('请输入有效的集数')
+            return redirect(url_for('courses.edit_course', course_id=course_id))
+            
         try:
             db.session.commit()
             flash('课程更新成功！')

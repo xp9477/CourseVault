@@ -15,7 +15,8 @@
                         <h3 class="font-medium">{{ course.title }}</h3>
                         <p class="text-sm text-gray-500">进度: {{ course.progress }}%</p>
                     </div>
-                    <a href="{{ url_for('courses.edit_course', course_id=course.id) }}"
+                    <a href="{{ course.share_link }}" 
+                       target="_blank"
                        class="text-blue-500 hover:text-blue-700">
                         继续学习
                     </a>
@@ -93,7 +94,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                       d="M12 8v4l3 3m6 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            进行中
+                            进行中 ({{ course.progress }}%)
                         </span>
                     {% else %}
                         <span class="flex items-center text-green-500">

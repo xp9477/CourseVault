@@ -2,7 +2,13 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-sm p-6">
-    <h2 class="text-2xl font-bold text-gray-900 mb-6">添加课程</h2>
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">
+        {% if current_user.is_admin %}
+        添加课程
+        {% else %}
+        申请添加课程
+        {% endif %}
+    </h2>
     
     <form method="POST" enctype="multipart/form-data">
         <div class="mb-4">
@@ -73,7 +79,11 @@
             </a>
             <button type="submit" 
                     class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                {% if current_user.is_admin %}
                 添加课程
+                {% else %}
+                提交申请
+                {% endif %}
             </button>
         </div>
     </form>

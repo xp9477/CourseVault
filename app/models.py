@@ -24,7 +24,6 @@ class Course(db.Model):
     description = db.Column(db.Text)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     share_link = db.Column(db.String(500), nullable=False)
-    share_code = db.Column(db.String(50))
     total_episodes = db.Column(db.Integer, default=1)
     progress = db.Column(db.Integer, default=0)
     image_url = db.Column(db.String(500))
