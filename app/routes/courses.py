@@ -28,60 +28,70 @@ def allowed_file(filename):
 @courses.route('/course/add', methods=['GET', 'POST'])
 @login_required
 def add_course():
-    if request.method == 'POST':
-        # 处理图片上传
-        image_url = None
-        if 'image' in request.files:
-            file = request.files['image']
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
-                filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-                file.save(filepath)
-                image_url = url_for('main.uploaded_file', filename=filename)
-        
-        # 如果是管理员,直接创建课程
-        if current_user.is_admin:
-            course = Course(
-                title=request.form['title'],
-                description=request.form.get('description'),
-                category_id=request.form['category_id'],
-                share_link=request.form['share_link'],
-                total_episodes=int(request.form.get('total_episodes')) if request.form.get('total_episodes') else 1,
-                image_url=image_url
-            )
+    image_url = None
+    try:
+        if request.method == 'POST':
+            # 处理图片上传
+            if 'image' in request.files:
+                file = request.files['image']
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+                    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                    file.save(filepath)
+                    image_url = url_for('main.uploaded_file', filename=filename)
+
+            # 如果是管理员,直接创建课程
+            if current_user.is_admin:
+                course = Course(
+                    title=request.form['title'],
+                    description=request.form.get('description'),
+                    category_id=request.form['category_id'],
+                    share_link=request.form['share_link'],
+                    total_episodes=int(request.form.get('total_episodes')) if request.form.get('total_episodes') else 1,
+                    image_url=image_url
+                )
+                
+                try:
+                    db.session.add(course)
+                    db.session.commit()
+                    flash('课程添加成功')
+                    return redirect(url_for('main.index'))
+                except Exception as e:
+                    if image_url:
+                        delete_course_image(image_url)
+                    db.session.rollback()
+                    flash('添加失败，请重试')
+                    print(f"Error: {e}")
             
-            try:
-                db.session.add(course)
-                db.session.commit()
-                flash('课程添加成功')
-                return redirect(url_for('main.index'))
-            except Exception as e:
-                db.session.rollback()
-                flash('添加失败，请重试')
-                print(f"Error: {e}")
-        
-        # 非管理员创建课程请求
-        else:
-            course_request = CourseRequest(
-                title=request.form['title'],
-                description=request.form.get('description'),
-                category_id=request.form['category_id'],
-                share_link=request.form['share_link'],
-                total_episodes=int(request.form.get('total_episodes')) if request.form.get('total_episodes') else 1,
-                image_url=image_url,
-                user_id=current_user.id
-            )
-            
-            try:
-                db.session.add(course_request)
-                db.session.commit()
-                flash('课程添加请求已提交,等待管理员审核')
-                return redirect(url_for('main.index'))
-            except Exception as e:
-                db.session.rollback()
-                flash('添加失败，请重试')
-                print(f"Error: {e}")
+            # 非管理员创建课程请求
+            else:
+                course_request = CourseRequest(
+                    title=request.form['title'],
+                    description=request.form.get('description'),
+                    category_id=request.form['category_id'],
+                    share_link=request.form['share_link'],
+                    total_episodes=int(request.form.get('total_episodes')) if request.form.get('total_episodes') else 1,
+                    image_url=image_url,
+                    user_id=current_user.id
+                )
+                
+                try:
+                    db.session.add(course_request)
+                    db.session.commit()
+                    flash('课程添加请求已提交,等待管理员审核')
+                    return redirect(url_for('main.index'))
+                except Exception as e:
+                    if image_url:
+                        delete_course_image(image_url)
+                    db.session.rollback()
+                    flash('添加失败，请重试')
+                    print(f"Error: {e}")
+    except Exception as e:
+        if image_url:
+            delete_course_image(image_url)
+        flash('操作失败，请重试')
+        print(f"Error: {e}")
     
     categories = Category.query.all()
     return render_template('courses/add.html', categories=categories)
@@ -90,6 +100,17 @@ def add_course():
 @login_required
 def edit_course(course_id):
     course = Course.query.get_or_404(course_id)
+    user_course = UserCourse.query.filter_by(
+        user_id=current_user.id,
+        course_id=course_id
+    ).first()
+    
+    if not user_course:
+        user_course = UserCourse(
+            user_id=current_user.id,
+            course_id=course_id
+        )
+        db.session.add(user_course)
     
     if request.method == 'POST':
         course.title = request.form['title']
@@ -97,20 +118,18 @@ def edit_course(course_id):
         course.category_id = request.form['category_id']
         course.share_link = request.form['share_link']
         
-        # 处理总集数，确保是整数
         try:
             course.total_episodes = int(request.form.get('total_episodes', 1))
         except (ValueError, TypeError):
             course.total_episodes = 1
             
-        course.notes = request.form.get('notes')
+        user_course.notes = request.form.get('notes')
         
         # 处理图片上传
         if 'image' in request.files:
             file = request.files['image']
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                # 确保目录存在
                 os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
                 filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                 file.save(filepath)
@@ -120,14 +139,14 @@ def edit_course(course_id):
         try:
             completed = int(request.form.get('completed_episodes', 0))
             if 0 <= completed <= course.total_episodes:
-                course.progress = round((completed / course.total_episodes) * 100)
+                user_course.progress = round((completed / course.total_episodes) * 100)
             else:
                 flash('已学习集数不能超过总集数')
                 return redirect(url_for('courses.edit_course', course_id=course_id))
         except (ValueError, ZeroDivisionError):
             flash('请输入有效的集数')
             return redirect(url_for('courses.edit_course', course_id=course_id))
-            
+
         try:
             db.session.commit()
             flash('课程更新成功！')
@@ -138,8 +157,10 @@ def edit_course(course_id):
             print(f"Error: {e}")
     
     categories = Category.query.all()
-    return render_template('courses/edit.html', course=course, categories=categories)
-
+    return render_template('courses/edit.html', 
+                         course=course, 
+                         categories=categories,
+                         user_course=user_course)
 @courses.route('/course/<int:course_id>/delete', methods=['POST'])
 @login_required
 def delete_course(course_id):
@@ -147,6 +168,10 @@ def delete_course(course_id):
     if not current_user.is_admin:
         flash('只有管理员可以删除课程')
         return redirect(url_for('main.index'))
+    
+    # 删除课程图片
+    if course.image_url:
+        delete_course_image(course.image_url)
     
     db.session.delete(course)
     db.session.commit()
@@ -199,3 +224,22 @@ def edit_notes(course_id):
     return render_template('courses/edit_notes.html', 
                          course=course,
                          notes=user_course.notes if user_course else '') 
+
+def delete_course_image(image_url):
+    if not image_url:
+        return
+        
+    # 从 URL 中提取文件名
+    filename = image_url.split('/')[-1]
+    if not filename:
+        return
+        
+    # 构建完整的文件路径
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    
+    # 删除文件
+    try:
+        if os.path.exists(filepath):
+            os.remove(filepath)
+    except Exception as e:
+        print(f"删除图片文件失败: {e}") 

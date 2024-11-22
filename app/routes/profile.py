@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
-from app.models import Course
+from app.models import Course, UserCourse
 from app.database import db
 
 profile = Blueprint('profile', __name__)
@@ -10,14 +10,16 @@ profile = Blueprint('profile', __name__)
 @login_required
 def index():
     # 获取已完成的课程
-    completed_courses = Course.query.filter(
-        Course.progress == 100
+    completed_courses = Course.query.join(UserCourse).filter(
+        UserCourse.user_id == current_user.id,
+        UserCourse.progress == 100
     ).all()
     
     # 获取进行中的课程
-    in_progress_courses = Course.query.filter(
-        Course.progress > 0,
-        Course.progress < 100
+    in_progress_courses = Course.query.join(UserCourse).filter(
+        UserCourse.user_id == current_user.id,
+        UserCourse.progress > 0,
+        UserCourse.progress < 100
     ).all()
     
     return render_template('profile/index.html',

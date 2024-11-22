@@ -1,5 +1,5 @@
 from flask import render_template, Blueprint, request, send_from_directory
-from app.models import Course, Category, CourseRequest
+from app.models import Course, Category, CourseRequest, UserCourse
 from flask_login import current_user, login_required
 from flask import current_app
 
@@ -17,9 +17,10 @@ def index():
     # 获取进行中的课程
     in_progress_courses = []
     if current_user.is_authenticated:
-        in_progress_courses = Course.query.filter(
-            Course.progress > 0,
-            Course.progress < 100
+        in_progress_courses = Course.query.join(UserCourse).filter(
+            UserCourse.user_id == current_user.id,
+            UserCourse.progress > 0,
+            UserCourse.progress < 100
         ).all()
     
     # 获取其他课程

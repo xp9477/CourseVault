@@ -5,6 +5,8 @@ from app.database import db
 from functools import wraps
 import os
 
+from app.routes.courses import delete_course_image
+
 admin = Blueprint('admin', __name__)
 
 def admin_required(f):
@@ -114,13 +116,10 @@ def handle_course_request(request_id, action):
             print(f"Error: {e}")
     
     elif action == 'reject':
-        # 如果有图片则删除
+        # 删除请求的图片
         if course_request.image_url:
-            filename = course_request.image_url.replace('/uploads/', '')
-            image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            if os.path.exists(image_path):
-                os.remove(image_path)
-        
+            delete_course_image(course_request.image_url)
+            
         db.session.delete(course_request)
         db.session.commit()
         flash('课程请求已拒绝')

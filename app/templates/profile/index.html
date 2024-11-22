@@ -59,16 +59,15 @@
                 <h2 class="text-xl font-bold mb-4">已完成的课程</h2>
                 <div class="grid grid-cols-1 gap-4">
                     {% for course in completed_courses %}
+                    {% set user_course = course.user_courses.filter_by(user_id=current_user.id).first() %}
                     <div class="border rounded p-4">
                         <div class="flex justify-between items-start">
                             <div>
                                 <h3 class="font-medium">{{ course.title }}</h3>
-                                <p class="text-sm text-gray-500">进度: {{ course.progress }}%</p>
+                                {% if user_course and user_course.notes %}
+                                <p class="text-sm text-gray-600 mt-1">{{ user_course.notes }}</p>
+                                {% endif %}
                             </div>
-                            <a href="{{ url_for('courses.edit_course', course_id=course.id) }}"
-                               class="text-blue-500 hover:text-blue-700">
-                                查看详情
-                            </a>
                         </div>
                     </div>
                     {% endfor %}

@@ -13,7 +13,8 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <h3 class="font-medium">{{ course.title }}</h3>
-                        <p class="text-sm text-gray-500">进度: {{ course.progress }}%</p>
+                        {% set user_course = course.user_courses.filter_by(user_id=current_user.id).first() %}
+                        <p class="text-sm text-gray-500">进度: {{ user_course.progress if user_course else 0 }}%</p>
                     </div>
                     <a href="{{ course.share_link }}" 
                        target="_blank"
@@ -51,7 +52,7 @@
                  'id': course.id,
                  'title': course.title,
                  'image_url': course.image_url or '',
-                 'progress': course.progress or 0,
+                 'progress': course.user_courses.filter_by(user_id=current_user.id).first().progress if course.user_courses.filter_by(user_id=current_user.id).first() else 0,
                  'category': course.category.name if course.category else '未分类',
                  'total_episodes': course.total_episodes or 1,
                  'description': course.description or '',
@@ -80,7 +81,8 @@
                 
                 <!-- 状态 -->
                 <div class="flex items-center space-x-2">
-                    {% if course.progress == 0 %}
+                    {% set user_course = course.user_courses.filter_by(user_id=current_user.id).first() %}
+                    {% if not user_course or user_course.progress == 0 %}
                         <span class="flex items-center text-red-500">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -88,20 +90,12 @@
                             </svg>
                             未开始
                         </span>
-                    {% elif course.progress < 100 %}
+                    {% elif user_course.progress < 100 %}
                         <span class="flex items-center text-yellow-500">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                      d="M12 8v4l3 3m6 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            进行中 ({{ course.progress }}%)
+                            进行中 ({{ user_course.progress }}%)
                         </span>
                     {% else %}
                         <span class="flex items-center text-green-500">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                      d="M5 13l4 4L19 7"/>
-                            </svg>
                             已完成
                         </span>
                     {% endif %}
