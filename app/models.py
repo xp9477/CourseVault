@@ -61,7 +61,6 @@ class CourseRequest(db.Model):
     description = db.Column(db.Text, nullable=True)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     share_link = db.Column(db.String(500), nullable=False)
-    share_code = db.Column(db.String(20), nullable=True)
     total_episodes = db.Column(db.Integer, default=1)
     image_url = db.Column(db.String(500), nullable=True)
     notes = db.Column(db.Text, nullable=True)

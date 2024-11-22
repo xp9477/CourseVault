@@ -47,7 +47,6 @@ def add_course():
             description=request.form.get('description'),
             category_id=request.form['category_id'],
             share_link=request.form['share_link'],
-            share_code=request.form.get('share_code'),
             total_episodes=int(request.form.get('total_episodes')) if request.form.get('total_episodes') else 1,
             image_url=image_url,
             user_id=current_user.id
@@ -76,7 +75,6 @@ def edit_course(course_id):
         course.description = request.form.get('description')
         course.category_id = request.form['category_id']
         course.share_link = request.form['share_link']
-        course.share_code = request.form.get('share_code')
         
         # 处理总集数，确保是整数
         try:
