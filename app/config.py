@@ -15,16 +15,9 @@ class Config:
     def init_app(app):
         os.makedirs(app.config['DATA_PATH'], exist_ok=True)
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-        
-        # 创建静态文件软链接
-        static_images_path = os.path.join(app.static_folder, 'data')
-        if not os.path.exists(static_images_path):
-            os.makedirs(os.path.dirname(static_images_path), exist_ok=True)
-            os.symlink(app.config['DATA_PATH'], static_images_path)
 
     # 数据库配置
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
 
 
 class DevelopmentConfig(Config):

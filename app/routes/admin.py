@@ -117,7 +117,8 @@ def handle_course_request(request_id, action):
     elif action == 'reject':
         # 如果有图片则删除
         if course_request.image_url:
-            image_path = os.path.join(current_app.config['DATA_PATH'], course_request.image_url)
+            filename = course_request.image_url.replace('/uploads/', '')
+            image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             if os.path.exists(image_path):
                 os.remove(image_path)
         

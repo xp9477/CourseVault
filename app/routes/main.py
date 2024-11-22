@@ -1,6 +1,7 @@
-from flask import render_template, Blueprint, request
+from flask import render_template, Blueprint, request, send_from_directory
 from app.models import Course, Category, CourseRequest
 from flask_login import current_user, login_required
+from flask import current_app
 
 main = Blueprint('main', __name__)
 
@@ -36,4 +37,9 @@ def index():
 
 @main.route('/about')
 def about():
-    return render_template('about.html') 
+    return render_template('about.html')
+
+@main.route('/uploads/<filename>')
+@login_required
+def uploaded_file(filename):
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename) 

@@ -5,7 +5,7 @@ from app.database import db
 import os
 from werkzeug.utils import secure_filename
 from functools import wraps
-from datetime import datetime
+from flask import url_for
 
 # 创建蓝图
 courses = Blueprint('courses', __name__)
@@ -36,10 +36,10 @@ def add_course():
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 # 确保目录存在
-                os.makedirs(os.path.join(current_app.config['DATA_PATH'], 'uploads'), exist_ok=True)
-                filepath = os.path.join(current_app.config['DATA_PATH'], 'uploads', filename)
+                os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+                filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                 file.save(filepath)
-                image_url = f'data/uploads/{filename}'
+                image_url = url_for('main.uploaded_file', filename=filename)
         
         # 创建课程请求
         course_request = CourseRequest(
@@ -92,10 +92,10 @@ def edit_course(course_id):
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 # 确保目录存在
-                os.makedirs(os.path.join(current_app.config['DATA_PATH'], 'uploads'), exist_ok=True)
-                filepath = os.path.join(current_app.config['DATA_PATH'], 'uploads', filename)
+                os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+                filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                 file.save(filepath)
-                course.image_url = url_for('static', filename=f'data/uploads/{filename}')
+                course.image_url = url_for('main.uploaded_file', filename=filename)
         
         try:
             db.session.commit()
